@@ -9,17 +9,18 @@ function formatDateTime(date) {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
+    timeZone: "Asia/Kolkata",
   });
 
   const datePart = d.toLocaleDateString("en-US", {
     month: "2-digit",
     day: "2-digit",
     year: "2-digit",
+    timeZone: "Asia/Kolkata",
   });
 
   return `${time} ${datePart}`;
 }
-
 function generateId() {
   return crypto.randomUUID();
 }
@@ -27,36 +28,12 @@ function generateId() {
 const messages = [
   {
     id: generateId(),
-    user: "Emma",
-    text: "Just thinking about old memories today...",
-    likes: 45,
-    liked: false,
+    user: "corvo",
+    text: "say what you couldn't say out loud.",
+    likes: 7,
+    liked: true,
     date: new Date(),
-  },
-  {
-    id: generateId(),
-    user: "Aman",
-    text: "Solo trip to the coast. Needed this.",
-    likes: 77,
-    liked: false,
-    date: new Date(),
-  },
-  {
-    id: generateId(),
-    user: "Sophia",
-    text: "Rainy evenings hit different.",
-    likes: 123,
-    liked: false,
-    date: new Date(),
-  },
-  {
-    id: generateId(),
-    user: "Isha",
-    text: "Sunsets make everything better.",
-    likes: 72,
-    liked: false,
-    date: new Date(),
-  },
+  }
 ];
 
 router.get("/", (req, res) => {
