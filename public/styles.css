@@ -1,0 +1,102 @@
+body {
+  background-color: #f4f3ee;
+  background-image: url("https://www.transparenttextures.com/patterns/cream-paper.png");
+
+  font-family: "Courier New", Courier, monospace;
+  font-weight: 600;
+  color: #002b59;
+
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  margin: 0;
+}
+
+.receipt-container {
+  width: 100%;
+  max-width: 550px;
+}
+
+.entry {
+  margin-bottom: 45px;
+}
+
+.entry-text {
+  font-size: 15px;
+  margin: 0 0 8px 0;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.divider {
+  overflow: hidden;
+  white-space: nowrap;
+  margin-bottom: 8px;
+  font-size: 15px;
+  letter-spacing: 1px;
+  opacity: 0.8;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.like-btn {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-weight: 600;
+  color: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: opacity 0.2s ease;
+}
+
+.like-btn:hover {
+  opacity: 0.7;
+}
+
+.like-btn.liked {
+  color: #002b59;
+  font-weight: bold;
+}
+
+.heart {
+  display: inline-block;
+  width: 16px;
+  text-align: center;
+  line-height: 1;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.action-link {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.action-link:hover {
+  opacity: 0.6;
+}
+
+h1 {
+  text-align: center;
+  font-size: 1.2rem;
+  margin: 1.8rem auto;
+}

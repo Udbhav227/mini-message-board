@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Message Log</title>
+    <style>
+      body {
+        background-color: #f4f3ee;
+        background-image: url("https://www.transparenttextures.com/patterns/cream-paper.png");
+        font-family: "Courier New", Courier, monospace;
+        font-weight: 600;
+        color: #002b59;
+        display: flex;
+        justify-content: center;
+        padding: 50px 20px;
+        margin: 0;
+      }
+
+      .receipt-container {
+        width: 100%;
+        max-width: 550px;
+      }
+
+      .header-text {
+        font-size: 15px;
+        margin: 0 0 8px 0;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        font-weight: bold;
+      }
+
+      .divider {
+        overflow: hidden;
+        white-space: nowrap;
+        margin-bottom: 25px;
+        font-size: 15px;
+        letter-spacing: 1px;
+        opacity: 0.8;
+      }
+
+      .typewriter-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      label {
+        font-size: 15px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      input[type="text"],
+      textarea {
+        background: transparent;
+        border: none;
+        border-bottom: 1px dashed #002b59;
+        font-family: inherit;
+        color: inherit;
+        font-size: 15px;
+        padding: 5px 0;
+        resize: none;
+        resize: vertical;
+        
+      }
+
+      input[type="text"]:focus,
+      textarea:focus {
+        outline: none;
+        border-bottom: 1px solid #002b59;
+      }
+
+      ::placeholder {
+        color: #2b3a5c;
+        opacity: 0.4;
+        text-transform: uppercase;
+      }
+
+      .submit-btn {
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        color: inherit;
+        font-size: 15px;
+        font-weight: bold;
+        cursor: pointer;
+        padding: 10px 0;
+        text-align: right;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: opacity 0.2s ease;
+      }
+
+      .submit-btn:hover {
+        opacity: 0.6;
+      }
+
+      .nav-link {
+        display: block;
+        margin-top: 30px;
+        color: inherit;
+        text-decoration: none;
+        font-size: 14px;
+        opacity: 0.7;
+      }
+
+      .nav-link:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+
+  <body>
+    
+    <div class="receipt-container">
+      <div class="header-text">NEW MESSAGE</div>
+      <div class="divider">
+        ------------------------------------------------------------
+      </div>
+
+      <form method="POST" action="/new" class="typewriter-form">
+        <div class="form-group">
+          <label for="messageUser">AUTHOR:</label>
+          <input
+            type="text"
+            id="messageUser"
+            name="messageUser"
+            placeholder="ENTER NAME..."
+            autocomplete="off"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="messageText">MESSAGE:</label>
+          <textarea
+            id="messageText"
+            name="messageText"
+            rows="2"
+            placeholder="TYPE YOUR MESSAGE HERE..."
+            required
+          ></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">[ SUBMIT ENTRY ]</button>
+      </form>
+
+      <a href="/" class="nav-link"> < BACK TO ARCHIVE</a>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Message Board</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body>
+  <div class="receipt-container">
+    <h1>MESSAGE BOARD</h1>
+    <div class="header-row">
+      <span>ARCHIVE LOG</span>
+      <a href="/new" class="action-link">[ + ADD NEW ENTRY ]</a>
+    </div>
+    <div class="divider" style="margin-bottom: 45px;">============================================================</div>
+    <% if (messages && messages.length > 0) { %>
+    <% messages.forEach(function(msg) { %>
+    <div class="entry">
+      <div class="entry-text"><%= msg.user %>: <%= msg.text %></div>
+      <div class="divider">------------------------------------------------------------</div>
+      <div class="meta-row">
+        <button class="like-btn" onclick="toggleLike(this)">
+          <span class="heart">♡</span>
+          <span><span class="like-count"><%= msg.likes.toString().padStart(3, '0') %></span></span>
+        </button>
+        <span><%= formatDateTime(msg.date) %></span>
+      </div>
+    </div>
+    <% }); %>
+    <% } else { %>
+    <div class="entry-text">NO ENTRIES FOUND.</div>
+    <% } %>
+  </div>
+  <script>
+    function toggleLike(btn) {
+      const countSpan = btn.querySelector('.like-count');
+      const heartSpan = btn.querySelector('.heart');
+
+      let count = parseInt(countSpan.innerText, 10);
+
+      if (btn.classList.contains('liked')) {
+        btn.classList.remove('liked');
+        heartSpan.innerText = '♡';
+        count--;
+      } else {
+        btn.classList.add('liked');
+        heartSpan.innerText = '♥';
+        count++;
+      }
+
+      countSpan.innerText = count.toString().padStart(3, '0');
+    }
+  </script>
+</body>
+
+</html>
