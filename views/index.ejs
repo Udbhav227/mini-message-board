@@ -11,6 +11,7 @@
 <body>
   <div class="receipt-container">
     <h1>MESSAGE BOARD</h1>
+
     <div class="sticky-header">
       <div class="header-row">
         <span>ARCHIVE LOG</span>
@@ -19,8 +20,8 @@
       <div class="divider">============================================================</div>
     </div>
 
-    <% if (messages && messages.length> 0) { %>
-    <% messages.forEach(function(msg, index) { %>
+    <% if (messages && messages.length > 0) { %>
+    <% messages.forEach(function(msg) { %>
     <div class="entry">
 
       <div class="entry-text">
@@ -29,18 +30,22 @@
           <%= msg.text %>
         </a>
       </div>
+
       <div class="divider">------------------------------------------------------------</div>
+
       <div class="meta-row">
-        <button class="like-btn" onclick="toggleLike(this)">
-          <span class="heart">♡</span>
-          <span><span class="like-count">
-              <%= msg.likes.toString().padStart(3, '0' ) %>
-            </span></span>
+        <button class="like-btn <%= msg.liked ? 'liked' : '' %>" onclick="toggleLike(this, '<%= msg.id %>')">
+          <span class="heart"><%= msg.liked ? '♥' : '♡' %></span>
+          <span class="like-count">
+            <%= msg.likes.toString().padStart(3, '0') %>
+          </span>
         </button>
+
         <span>
           <%= formatDateTime(msg.date) %>
         </span>
       </div>
+
     </div>
     <% }); %>
     <% } else { %>
@@ -49,21 +54,30 @@
   </div>
 
   <script>
-    function toggleLike(btn) {
+    async function toggleLike(btn, id) {
       const countSpan = btn.querySelector('.like-count');
       const heartSpan = btn.querySelector('.heart');
-      let count = parseInt(countSpan.innerText, 10);
 
-      if (btn.classList.contains('liked')) {
-        btn.classList.remove('liked');
-        heartSpan.innerText = '♡';
-        count--;
-      } else {
-        btn.classList.add('liked');
-        heartSpan.innerText = '♥';
-        count++;
+      try {
+        const res = await fetch(`/like/${id}`, {
+          method: "POST",
+        });
+
+        const data = await res.json();
+
+        countSpan.innerText = data.likes.toString().padStart(3, '0');
+
+        if (data.liked) {
+          btn.classList.add('liked');
+          heartSpan.innerText = '♥';
+        } else {
+          btn.classList.remove('liked');
+          heartSpan.innerText = '♡';
+        }
+
+      } catch (err) {
+        console.error("Like failed:", err);
       }
-      countSpan.innerText = count.toString().padStart(3, '0');
     }
   </script>
 </body>

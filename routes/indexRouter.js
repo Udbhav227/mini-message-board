@@ -30,6 +30,7 @@ const messages = [
     user: "Emma",
     text: "Just thinking about old memories today...",
     likes: 45,
+    liked: false,
     date: new Date(),
   },
   {
@@ -37,6 +38,7 @@ const messages = [
     user: "Aman",
     text: "Solo trip to the coast. Needed this.",
     likes: 77,
+    liked: false,
     date: new Date(),
   },
   {
@@ -44,6 +46,7 @@ const messages = [
     user: "Sophia",
     text: "Rainy evenings hit different.",
     likes: 123,
+    liked: false,
     date: new Date(),
   },
   {
@@ -51,6 +54,7 @@ const messages = [
     user: "Isha",
     text: "Sunsets make everything better.",
     likes: 72,
+    liked: false,
     date: new Date(),
   },
 ];
@@ -71,6 +75,7 @@ router.post("/new", (req, res) => {
     user: messageUser,
     text: messageText,
     likes: 0,
+    liked: false,
     date: new Date(),
   });
 
@@ -87,6 +92,28 @@ router.get("/message/:id", (req, res) => {
   } else {
     res.status(404).send("ENTRY NOT FOUND.");
   }
+});
+
+router.post("/like/:id", (req, res) => {
+  const id = req.params.id;
+
+  const message = messages.find((msg) => msg.id === id);
+  if (!message) {
+    return res.status(404).json({ error: "Message not found" });
+  }
+
+  if (message.liked) {
+    message.likes = Math.max(0, message.likes - 1);
+    message.liked = false;
+  } else {
+    message.likes += 1;
+    message.liked = true;
+  }
+
+  res.json({
+    likes: message.likes,
+    liked: message.liked,
+  });
 });
 
 module.exports = router;
