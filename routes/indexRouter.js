@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const crypto = require("crypto");
 
 function formatDateTime(date) {
   const d = new Date(date);
@@ -19,23 +20,37 @@ function formatDateTime(date) {
   return `${time} ${datePart}`;
 }
 
+function generateId() {
+  return crypto.randomUUID();
+}
+
 const messages = [
   {
-    user: "Adam",
+    id: generateId(),
+    user: "Emma",
     text: "Just thinking about old memories today...",
     likes: 45,
     date: new Date(),
   },
   {
+    id: generateId(),
     user: "Aman",
-    text: "Spontaneous trip to the coast. Needed this.",
+    text: "Solo trip to the coast. Needed this.",
     likes: 77,
     date: new Date(),
   },
   {
-    user: "Erik",
-    text: "Late night coffee and lo-fi beats. Perfect.",
+    id: generateId(),
+    user: "Sophia",
+    text: "Rainy evenings hit different.",
     likes: 123,
+    date: new Date(),
+  },
+  {
+    id: generateId(),
+    user: "Isha",
+    text: "Sunsets make everything better.",
+    likes: 72,
     date: new Date(),
   },
 ];
@@ -52,6 +67,7 @@ router.post("/new", (req, res) => {
   const { messageUser, messageText } = req.body;
 
   messages.unshift({
+    id: generateId(),
     user: messageUser,
     text: messageText,
     likes: 0,
@@ -59,6 +75,18 @@ router.post("/new", (req, res) => {
   });
 
   res.redirect("/");
+});
+
+router.get("/message/:id", (req, res) => {
+  const id = req.params.id;
+
+  const message = messages.find((msg) => msg.id === id);
+
+  if (message) {
+    res.render("message", { message, formatDateTime });
+  } else {
+    res.status(404).send("ENTRY NOT FOUND.");
+  }
 });
 
 module.exports = router;

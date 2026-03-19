@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entry Details</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body>
+  <div class="receipt-container">
+
+    <div class="header-row">
+      <span>ENTRY DETAILS</span>
+    </div>
+    <div class="divider" style="margin-bottom: 45px;">============================================================</div>
+
+    <div class="entry">
+      <div class="entry-text" style="margin-bottom: 15px;">
+        <strong>AUTHOR:</strong> <%= message.user %>
+      </div>
+      <div class="entry-text">
+        <strong>LOG:</strong> <%= message.text %>
+      </div>
+
+      <div class="divider" style="margin-top: 25px;">------------------------------------------------------------</div>
+
+      <div class="meta-row">
+        <span>LIKES: <%= message.likes.toString().padStart(3, '0') %></span>
+        <span>ENTRY: <%= formatDateTime(message.date) %></span>
+      </div>
+    </div>
+
+    <div style="margin-top: 50px;">
+      <a href="/" class="nav-link">
+
+        < BACK TO ARCHIVE</a>
+    </div>
+
+  </div>
+</body>
+
+</html>
