@@ -21,48 +21,50 @@ function formatDateTime(date) {
 
   return `${time} ${datePart}`;
 }
-function generateId() {
-  return crypto.randomUUID();
-}
 
-const messages = [
-  {
-    id: generateId(),
-    user: "corvo",
-    text: "say what you couldn't say out loud.",
-    likes: 7,
-    liked: true,
-    date: new Date(),
-  }
+const validateMessage = [
+  body("messageUser")
+    .trim()
+    .notEmpty()
+    .withMessage("Name cannot be empty.")
+    .isLength({ max: 50 })
+    .withMessage("Name must be under 50 characters.")
+    .escape(),
+  body("messageText")
+    .trim()
+    .notEmpty()
+    .withMessage("Message cannot be empty.")
+    .isLength({ max: 120 })
+    .withMessage("Message must be under 120 characters.")
+    .escape(),
 ];
 
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
+  const messages = await db.getAllMessages();
   res.render("index", { messages, formatDateTime });
 });
 
 router.get("/new", (req, res) => {
-  res.render("new");
+  res.render("new", {errors: null});
 });
 
-router.post("/new", (req, res) => {
+router.post("/new", validateMessage, async (req, res) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).render("new", {
+      errors: errors.array(),
+    });
+  }
+
   const { messageUser, messageText } = req.body;
-
-  messages.unshift({
-    id: generateId(),
-    user: messageUser,
-    text: messageText,
-    likes: 0,
-    liked: false,
-    date: new Date(),
-  });
-
+  await db.insertMessage(messageUser, messageText);
   res.redirect("/");
 });
 
-router.get("/message/:id", (req, res) => {
-  const id = req.params.id;
-
-  const message = messages.find((msg) => msg.id === id);
+router.get("/message/:id", async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const message = await db.getMessageById(id);
 
   if (message) {
     res.render("message", { message, formatDateTime });
@@ -71,26 +73,19 @@ router.get("/message/:id", (req, res) => {
   }
 });
 
-router.post("/like/:id", (req, res) => {
-  const id = req.params.id;
-
-  const message = messages.find((msg) => msg.id === id);
-  if (!message) {
-    return res.status(404).json({ error: "Message not found" });
+router.post("/like/:id", async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  
+  try {
+    const newLikesCount = await db.updateLikes(id, 1);
+    res.json({
+      likes: newLikesCount,
+      liked: true,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to update like" });
   }
-
-  if (message.liked) {
-    message.likes = Math.max(0, message.likes - 1);
-    message.liked = false;
-  } else {
-    message.likes += 1;
-    message.liked = true;
-  }
-
-  res.json({
-    likes: message.likes,
-    liked: message.liked,
-  });
 });
 
 module.exports = router;
