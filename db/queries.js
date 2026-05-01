@@ -1,9 +1,13 @@
 const pool = require("./pool");
 
 async function getAllMessages() {
-  const { rows } = await pool.query(
-    "SELECT * FROM messages ORDER BY added DESC",
-  );
+  const { rows } = await pool.query(`
+    SELECT *
+    FROM messages
+    ORDER BY
+      CASE WHEN flags >= 10 THEN 1 ELSE 0 END ASC,  -- flagged posts sink
+      added DESC                                      -- newest first within each group
+  `);
   return rows;
 }
 
@@ -21,20 +25,26 @@ async function insertMessage(user, text) {
   ]);
 }
 
-async function updateLikes(id, incrementBy) {
+async function updateLikes(id, delta) {
   const { rows } = await pool.query(
-    "UPDATE messages SET likes = likes + $1 WHERE id = $2 RETURNING likes",
-    [incrementBy, id],
+    `UPDATE messages
+     SET likes = GREATEST(0, likes + $1)
+     WHERE id = $2
+     RETURNING likes`,
+    [delta, id],
   );
-  return rows[0].likes;
+  return rows[0]?.likes ?? 0;
 }
 
 async function updateFlags(id, incrementBy) {
   const { rows } = await pool.query(
-    "UPDATE messages SET flags = flags + $1 WHERE id = $2 RETURNING flags",
+    `UPDATE messages
+     SET flags = flags + $1
+     WHERE id = $2
+     RETURNING flags`,
     [incrementBy, id],
   );
-  return rows[0].flags;
+  return rows[0]?.flags ?? 0;
 }
 
 module.exports = {

@@ -1,166 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>New Message Log</title>
-    <style>
-      body {
-        background-color: #f4f3ee;
-        background-image: url("https://www.transparenttextures.com/patterns/cream-paper.png");
-        font-family: "Courier New", Courier, monospace;
-        font-weight: 600;
-        color: #002b59;
-        display: flex;
-        justify-content: center;
-        padding: 50px 20px;
-        margin: 0;
-      }
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New post</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="page">
 
-      .receipt-container {
-        width: 100%;
-        max-width: 550px;
-      }
+  <div class="form-masthead">
+    <h1 class="form-title">New post</h1>
+    <p class="form-sub">Keep it civil. Max 120 characters.</p>
+  </div>
 
-      .header-text {
-        font-size: 15px;
-        margin: 0 0 8px 0;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-        font-weight: bold;
-      }
+  <% if (locals.errors && errors.length > 0) { %>
+    <ul class="errors">
+      <% errors.forEach(e => { %>
+        <li><%= e.msg %></li>
+      <% }); %>
+    </ul>
+  <% } %>
 
-      .divider {
-        overflow: hidden;
-        white-space: nowrap;
-        margin-bottom: 25px;
-        font-size: 15px;
-        letter-spacing: 1px;
-        opacity: 0.8;
-      }
+  <form method="POST" action="/new">
 
-      .typewriter-form {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-      }
-
-      .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-      }
-
-      label {
-        font-size: 15px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-
-      input[type="text"],
-      textarea {
-        background: transparent;
-        border: none;
-        border-bottom: 1px dashed #002b59;
-        font-family: inherit;
-        color: inherit;
-        font-size: 15px;
-        padding: 5px 0;
-        resize: none;
-        resize: vertical;
-        
-      }
-
-      input[type="text"]:focus,
-      textarea:focus {
-        outline: none;
-        border-bottom: 1px solid #002b59;
-      }
-
-      ::placeholder {
-        color: #2b3a5c;
-        opacity: 0.4;
-        text-transform: uppercase;
-      }
-
-      .submit-btn {
-        background: transparent;
-        border: none;
-        font-family: inherit;
-        color: inherit;
-        font-size: 15px;
-        font-weight: bold;
-        cursor: pointer;
-        padding: 10px 0;
-        text-align: right;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        transition: opacity 0.2s ease;
-      }
-
-      .submit-btn:hover {
-        opacity: 0.6;
-      }
-
-      .nav-link {
-        display: block;
-        margin-top: 30px;
-        color: inherit;
-        text-decoration: none;
-        font-size: 14px;
-        opacity: 0.7;
-      }
-
-      .nav-link:hover {
-        text-decoration: underline;
-      }
-    </style>
-  </head>
-
-  <body>
-    
-    <div class="receipt-container">
-      <div class="header-text">NEW MESSAGE</div>
-      <div class="divider">
-        ------------------------------------------------------------
-      </div>
-      <% if (locals.errors) { %>
-        <div style="color: #d9534f; margin-bottom: 20px; border: 1px dashed #d9534f; padding: 10px;">
-          <ul style="margin: 0; padding-left: 20px;">
-            <% errors.forEach(function(error) { %>
-              <li><%= error.msg %></li>
-            <% }); %>
-          </ul>
-        </div>
-      <% } %>
-      <form method="POST" action="/new" class="typewriter-form">
-        <div class="form-group">
-          <label for="messageUser">AUTHOR:</label>
-          <input
-            type="text"
-            id="messageUser"
-            name="messageUser"
-            placeholder="ENTER NAME..."
-            autocomplete="off"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="messageText">MESSAGE:</label>
-          <textarea
-            id="messageText"
-            name="messageText"
-            rows="2"
-            placeholder="TYPE YOUR MESSAGE HERE..."
-            required
-          ></textarea>
-        </div>
-
-        <button type="submit" class="submit-btn">[ SUBMIT ENTRY ]</button>
-      </form>
-
-      <a href="/" class="nav-link"> < BACK TO ARCHIVE</a>
+    <div class="form-group">
+      <label class="form-label" for="messageUser">Your name</label>
+      <input
+        class="form-input"
+        type="text"
+        id="messageUser"
+        name="messageUser"
+        placeholder="e.g. Ash"
+        autocomplete="off"
+        maxlength="50"
+        required
+      >
     </div>
-  </body>
+
+    <div class="form-group">
+      <label class="form-label" for="messageText">Message</label>
+      <textarea
+        class="form-textarea"
+        id="messageText"
+        name="messageText"
+        rows="3"
+        placeholder="What's on your mind?"
+        maxlength="120"
+        required
+      ></textarea>
+      <div class="char-hint" id="char-hint">120 characters remaining</div>
+    </div>
+
+    <button type="submit" class="btn-submit">Post</button>
+  </form>
+
+  <a href="/" class="nav-back">← Back to board</a>
+
+</div>
+
+<script>
+  const ta = document.getElementById('messageText');
+  const hint = document.getElementById('char-hint');
+
+  ta.addEventListener('input', () => {
+    const left = 120 - ta.value.length;
+    hint.textContent = `${left} character${left === 1 ? '' : 's'} remaining`;
+    hint.className = 'char-hint' + (left <= 20 ? ' warn' : '') + (left <= 0 ? ' over' : '');
+  });
+</script>
+</body>
 </html>

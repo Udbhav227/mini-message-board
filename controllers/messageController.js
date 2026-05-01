@@ -14,22 +14,28 @@ function formatDateTime(date) {
   });
 }
 
+// GET /
 async function getIndex(req, res) {
   const messages = await db.getAllMessages();
-  res.render("index", { messages, formatDateTime });
+  const notice = req.query.rateLimited
+    ? `You already ${req.query.rateLimited}d this recently.`
+    : null;
+  res.render("index", { messages, formatDateTime, notice });
 }
 
+// GET /new
 function getNewMessage(req, res) {
   res.render("new", { errors: null });
 }
 
+// POST /new
 const createMessage = [
   body("messageUser")
     .trim()
     .notEmpty()
-    .withMessage("Author name cannot be empty.")
+    .withMessage("Name cannot be empty.")
     .isLength({ max: 50 })
-    .withMessage("Author name must be under 50 characters.")
+    .withMessage("Name must be under 50 characters.")
     .escape(),
   body("messageText")
     .trim()
@@ -53,43 +59,38 @@ const createMessage = [
 async function getMessageDetails(req, res) {
   const id = parseInt(req.params.id, 10);
   const message = await db.getMessageById(id);
-
   if (message) {
     res.render("message", { message, formatDateTime });
   } else {
-    res.status(404).send("Message not found.");
+    res.status(404).send("Not found.");
   }
 }
 
 async function flagMessage(req, res) {
   const id = parseInt(req.params.id, 10);
   try {
-    const newFlagsCount = await db.updateFlags(id, 1);
-    if (newFlagsCount >= 5) {
-      console.log(`Message ${id} has reached 5 flags! Time to hide it.`);
+    const newFlags = await db.updateFlags(id, 1);
+    if (newFlags >= 5) {
+      console.log(`Post ${id} has ${newFlags} flags - consider removing.`);
     }
     res.redirect("/");
   } catch (err) {
     console.error(err);
-    res.status(500).send("Error flagging message.");
+    res.status(500).send("Error flagging post.");
   }
 }
 
 async function likeMessage(req, res) {
   const id = parseInt(req.params.id, 10);
-
   const currentlyLiked = req.body.liked === "true";
   const delta = currentlyLiked ? -1 : 1;
 
   try {
-    const newLikesCount = await db.updateLikes(id, delta);
-    res.json({
-      likes: newLikesCount,
-      liked: !currentlyLiked,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to update like" });
+    const newLikes = await db.updateLikes(id, delta);
+    res.json({ likes: newLikes, liked: !currentlyLiked });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update like." });
   }
 }
 

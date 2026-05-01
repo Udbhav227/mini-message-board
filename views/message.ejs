@@ -1,44 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Entry Details</title>
+  <title><%= message.user %>'s post</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
-
 <body>
-  <div class="receipt-container">
+<div class="page">
 
-    <div class="header-row">
-      <span>ENTRY DETAILS</span>
+  <a href="/" class="detail-nav">← Back to board</a>
+
+  <div class="detail-wrap">
+    <div class="detail-author"><%= message.user %></div>
+    <p class="detail-body"><%= message.text %></p>
+
+    <div class="detail-footer">
+      <span class="detail-stat"><strong><%= message.likes %></strong> likes</span>
+      <span class="detail-stat"><strong><%= message.flags || 0 %></strong> reports</span>
+      <span class="detail-stat"><%= formatDateTime(message.added) %></span>
+
+      <form method="POST" action="/flag/<%= message.id %>" style="margin-left: auto;">
+        <button
+          type="submit"
+          class="btn-flag-outline"
+          onclick="return confirm('Report this post?')"
+        >
+          &#9873; Report
+        </button>
+      </form>
     </div>
-    <div class="divider" style="margin-bottom: 45px;">============================================================</div>
-
-    <div class="entry">
-      <div class="entry-text" style="margin-bottom: 15px;">
-        <strong>AUTHOR:</strong> <%= message.user %>
-      </div>
-      <div class="entry-text">
-        <strong>LOG:</strong> <%= message.text %>
-      </div>
-
-      <div class="divider" style="margin-top: 25px;">------------------------------------------------------------</div>
-
-      <div class="meta-row">
-        <span>LIKES: <%= message.likes.toString().padStart(3, '0') %></span>
-        <span>ENTRY: <%= formatDateTime(message.added) %></span>
-      </div>
-    </div>
-
-    <div style="margin-top: 50px;">
-      <a href="/" class="nav-link">
-
-        < BACK TO ARCHIVE</a>
-    </div>
-
   </div>
-</body>
 
+</div>
+</body>
 </html>

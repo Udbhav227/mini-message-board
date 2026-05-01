@@ -1,83 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Message Board</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
-
 <body>
-  <div class="receipt-container">
-    <h1>MESSAGE BOARD</h1>
+<div class="page">
 
-    <div class="sticky-header">
-      <div class="header-row">
-        <span>ARCHIVE LOG</span>
-        <a href="/new" class="action-link">[ + ADD NEW ENTRY ]</a>
-      </div>
-      <div class="divider">============================================================</div>
-    </div>
+  <header class="masthead">
+    <h1 class="masthead-title">Message<em>Board</em></h1>
+    <span class="masthead-count"><%= messages.length %> posts</span>
+  </header>
 
-    <% if (messages && messages.length > 0) { %>
-    <% messages.forEach(function(msg) { %>
-    <div class="entry">
-
-      <div class="entry-text">
-        <%= msg.user %>:
-        <a href="/message/<%= msg.id %>" class="invisible-link">
-          <%= msg.text %>
-        </a>
-      </div>
-
-      <div class="divider">------------------------------------------------------------</div>
-
-      <div class="meta-row">
-        <button class="like-btn" data-liked="false" onclick="toggleLike(this, '<%= msg.id %>')">
-          <span class="heart">♡</span>
-          <span class="like-count"><%= msg.likes.toString().padStart(3, '0') %></span>
-        </button>
-
-        <span>
-          <span><%= formatDateTime(msg.added) %></span>
-        </span>
-      </div>
-
-    </div>
-    <% }); %>
-    <% } else { %>
-    <div class="entry-text">NO ENTRIES FOUND.</div>
-    <% } %>
+  <div class="toolbar">
+    <span class="toolbar-label">Recent</span>
+    <a href="/new" class="btn-new">Post something</a>
   </div>
 
+  <% if (notice) { %>
+    <div class="notice"><%= notice %></div>
+  <% } %>
+
+  <% if (messages && messages.length > 0) { %>
+    <% messages.forEach(function(msg) {
+         const isDemoted = msg.flags >= 5;
+    %>
+    <article class="post <%= isDemoted ? 'demoted' : '' %>">
+
+      <div class="vote-col">
+        <button
+          class="like-btn"
+          data-liked="false"
+          data-id="<%= msg.id %>"
+          aria-label="Like this post"
+        >♡</button>
+        <span class="like-count"><%= msg.likes %></span>
+      </div>
+
+      <div>
+        <div class="post-author"><%= msg.user %></div>
+        <a href="/message/<%= msg.id %>" class="post-text"><%= msg.text %></a>
+
+        <div class="post-footer">
+          <span class="post-time"><%= formatDateTime(msg.added) %></span>
+
+          <form class="flag-form" method="POST" action="/flag/<%= msg.id %>">
+            <button
+              type="submit"
+              class="flag-btn <%= msg.flags > 0 ? 'has-flags' : '' %>"
+              onclick="return confirm('Flag this post as inappropriate?')"
+            >
+              &#9873;
+              <% if (msg.flags > 0) { %>
+                <span class="flag-count-badge <%= msg.flags >= 3 ? 'elevated' : '' %>">
+                  <%= msg.flags %>
+                </span>
+              <% } else { %>
+                Flag
+              <% } %>
+            </button>
+          </form>
+
+          <% if (isDemoted) { %>
+            <span class="demoted-tag">Reported</span>
+          <% } %>
+        </div>
+      </div>
+
+    </article>
+    <% }); %>
+  <% } else { %>
+    <div class="empty">
+      <p class="empty-title">Nothing here yet.</p>
+      <p>Be the first to post something.</p>
+    </div>
+  <% } %>
+
+</div>
+
 <script>
-  async function toggleLike(btn, id) {
-    const countSpan = btn.querySelector('.like-count');
-    const heartSpan = btn.querySelector('.heart');
+  document.querySelectorAll('.like-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+      const liked = btn.dataset.liked === 'true';
+      const countEl = btn.closest('.vote-col').querySelector('.like-count');
 
-    const currentlyLiked = btn.dataset.liked === "true";
+      try {
+        const res = await fetch(`/like/${id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `liked=${liked}`,
+        });
 
-    try {
-      const res = await fetch(`/like/${id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `liked=${currentlyLiked}`,
-      });
+        if (res.status === 429) {
+          const data = await res.json();
+          btn.style.opacity = '0.3';
+          setTimeout(() => btn.style.opacity = '', 800);
+          return;
+        }
 
-      const data = await res.json();
-
-      countSpan.innerText = data.likes.toString().padStart(3, '0');
-
-      btn.dataset.liked = data.liked.toString();
-      heartSpan.innerText = data.liked ? '♥' : '♡';
-      btn.classList.toggle('liked', data.liked);
-
-    } catch (err) {
-      console.error("Like failed:", err);
-    }
-  }
+        const data = await res.json();
+        countEl.textContent = data.likes;
+        btn.dataset.liked = data.liked;
+        btn.textContent = data.liked ? '♥' : '♡';
+        btn.classList.toggle('liked', data.liked);
+      } catch (e) {
+        console.error(e);
+      }
+    });
+  });
 </script>
 </body>
-
 </html>
