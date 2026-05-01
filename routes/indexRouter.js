@@ -7,5 +7,6 @@ router.get("/new", messageController.getNewMessage);
 router.post("/new", messageController.createMessage);
 router.get("/message/:id", messageController.getMessageDetails);
 router.post("/flag/:id", messageController.flagMessage);
+router.post("/like/:id", messageController.likeMessage);
 
 module.exports = router;

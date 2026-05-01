@@ -34,15 +34,13 @@
       <div class="divider">------------------------------------------------------------</div>
 
       <div class="meta-row">
-        <button class="like-btn <%= msg.liked ? 'liked' : '' %>" onclick="toggleLike(this, '<%= msg.id %>')">
-          <span class="heart"><%= msg.liked ? '♥' : '♡' %></span>
-          <span class="like-count">
-            <%= msg.likes.toString().padStart(3, '0') %>
-          </span>
+        <button class="like-btn" data-liked="false" onclick="toggleLike(this, '<%= msg.id %>')">
+          <span class="heart">♡</span>
+          <span class="like-count"><%= msg.likes.toString().padStart(3, '0') %></span>
         </button>
 
         <span>
-          <%= formatDateTime(msg.date) %>
+          <span><%= formatDateTime(msg.added) %></span>
         </span>
       </div>
 
@@ -53,33 +51,33 @@
     <% } %>
   </div>
 
-  <script>
-    async function toggleLike(btn, id) {
-      const countSpan = btn.querySelector('.like-count');
-      const heartSpan = btn.querySelector('.heart');
+<script>
+  async function toggleLike(btn, id) {
+    const countSpan = btn.querySelector('.like-count');
+    const heartSpan = btn.querySelector('.heart');
 
-      try {
-        const res = await fetch(`/like/${id}`, {
-          method: "POST",
-        });
+    const currentlyLiked = btn.dataset.liked === "true";
 
-        const data = await res.json();
+    try {
+      const res = await fetch(`/like/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `liked=${currentlyLiked}`,
+      });
 
-        countSpan.innerText = data.likes.toString().padStart(3, '0');
+      const data = await res.json();
 
-        if (data.liked) {
-          btn.classList.add('liked');
-          heartSpan.innerText = '♥';
-        } else {
-          btn.classList.remove('liked');
-          heartSpan.innerText = '♡';
-        }
+      countSpan.innerText = data.likes.toString().padStart(3, '0');
 
-      } catch (err) {
-        console.error("Like failed:", err);
-      }
+      btn.dataset.liked = data.liked.toString();
+      heartSpan.innerText = data.liked ? '♥' : '♡';
+      btn.classList.toggle('liked', data.liked);
+
+    } catch (err) {
+      console.error("Like failed:", err);
     }
-  </script>
+  }
+</script>
 </body>
 
 </html>

@@ -14,18 +14,15 @@ function formatDateTime(date) {
   });
 }
 
-// GET /
 async function getIndex(req, res) {
   const messages = await db.getAllMessages();
-  res.render("index", { messages: messages, formatDateTime: formatDateTime });
+  res.render("index", { messages, formatDateTime });
 }
 
-// GET /new
 function getNewMessage(req, res) {
   res.render("new", { errors: null });
 }
 
-// POST /new
 const createMessage = [
   body("messageUser")
     .trim()
@@ -44,45 +41,55 @@ const createMessage = [
 
   async (req, res) => {
     const errors = validationResult(req);
-
     if (!errors.isEmpty()) {
-      return res.status(400).render("new", {
-        errors: errors.array(),
-      });
+      return res.status(400).render("new", { errors: errors.array() });
     }
-
     const { messageUser, messageText } = req.body;
     await db.insertMessage(messageUser, messageText);
     res.redirect("/");
   },
 ];
 
-// GET /message/:id
 async function getMessageDetails(req, res) {
   const id = parseInt(req.params.id, 10);
   const message = await db.getMessageById(id);
 
   if (message) {
-    res.render("message", { message: message, formatDateTime: formatDateTime });
+    res.render("message", { message, formatDateTime });
   } else {
     res.status(404).send("Message not found.");
   }
 }
 
-// POST /flag/:id
 async function flagMessage(req, res) {
   const id = parseInt(req.params.id, 10);
   try {
     const newFlagsCount = await db.updateFlags(id, 1);
-
     if (newFlagsCount >= 5) {
       console.log(`Message ${id} has reached 5 flags! Time to hide it.`);
     }
-
     res.redirect("/");
   } catch (err) {
     console.error(err);
     res.status(500).send("Error flagging message.");
+  }
+}
+
+async function likeMessage(req, res) {
+  const id = parseInt(req.params.id, 10);
+
+  const currentlyLiked = req.body.liked === "true";
+  const delta = currentlyLiked ? -1 : 1;
+
+  try {
+    const newLikesCount = await db.updateLikes(id, delta);
+    res.json({
+      likes: newLikesCount,
+      liked: !currentlyLiked,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to update like" });
   }
 }
 
@@ -92,4 +99,5 @@ module.exports = {
   createMessage,
   getMessageDetails,
   flagMessage,
+  likeMessage,
 };
