@@ -1,10 +1,8 @@
 const pool = require("./pool");
 
-// Flagged posts always sink regardless of sort mode.
-// The CASE guard is prepended to every ORDER BY.
-const FLAG_SINK = `CASE WHEN flags >= 3 THEN 1 ELSE 0 END ASC`;
 
-// Sort SQL fragments — all parameterless, safe to interpolate.
+const FLAG_SINK = `CASE WHEN flags >= 10 THEN 1 ELSE 0 END ASC`;
+
 const SORT_SQL = {
   // Newest first
   new: `${FLAG_SINK}, added DESC`,
@@ -12,7 +10,6 @@ const SORT_SQL = {
   // Most liked overall
   top: `${FLAG_SINK}, likes DESC, added DESC`,
 
-  // Reddit-style hot: score decays with age.
   // log10(likes+1) / hours_since_posted^0.8
   // NULLIF prevents division by zero for brand-new posts (< 1hr old).
   hot: `
@@ -35,7 +32,7 @@ const SORT_SQL = {
   `,
 
   // Controversial: posts that have both likes AND flags (divisive content)
-  // High likes × high flags = high score
+  // High likes * high flags = high score
   controversial: `
     ${FLAG_SINK},
     (likes + 1) * (flags + 1) DESC,
