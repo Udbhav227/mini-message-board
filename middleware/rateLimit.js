@@ -34,7 +34,7 @@ function rateLimitAction(action) {
       }
 
       // For form submissions (flag), redirect back with a flash-style query param
-      return res.redirect(`/?rateLimited=${action}&wait=${secondsLeft}`);
+      return res.redirect(`/?rateLimited=${action}`);
     }
 
     actionLog.set(key, now);
