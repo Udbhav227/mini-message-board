@@ -9,13 +9,11 @@
 <body>
 <div class="page">
 
-  <!-- Masthead -->
   <header class="masthead">
     <h1 class="masthead-title">Message<em>Board</em></h1>
     <span class="masthead-count"><%= messages.length %> posts</span>
   </header>
 
-  <!-- Toolbar: sort tabs + new post button -->
   <div class="toolbar">
     <nav class="sort-tabs" aria-label="Sort posts by">
       <%
@@ -39,19 +37,19 @@
     <a href="/new" class="btn-new">Post something</a>
   </div>
 
-  <!-- Rate-limit notice -->
-  <% if (notice) { %>
-    <div class="notice"><%= notice %></div>
+<% if (notice) { %>
+    <div class="notice" id="flash-notice">
+      <span class="notice-text"><%= notice %></span>
+      <button class="dismiss-notice-btn" aria-label="Dismiss notice">&times;</button>
+    </div>
   <% } %>
 
-  <!-- Posts -->
   <% if (messages && messages.length > 0) { %>
     <% messages.forEach(function(msg) {
          const isDemoted = msg.flags >= 5;
     %>
     <article class="post <%= isDemoted ? 'demoted' : '' %>">
 
-      <!-- Like / vote column -->
       <div class="vote-col">
         <button
           class="like-btn"
@@ -62,7 +60,6 @@
         <span class="like-count"><%= msg.likes %></span>
       </div>
 
-      <!-- Content -->
       <div>
         <div class="post-author"><%= msg.user %></div>
         <a href="/message/<%= msg.id %>" class="post-text"><%= msg.text %></a>
@@ -134,6 +131,14 @@
       }
     });
   });
+
+  const dismissBtn = document.querySelector('.dismiss-notice-btn');
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', () => {
+      const notice = document.getElementById('flash-notice');
+      notice.style.display = 'none'; 
+    });
+  }
 </script>
 </body>
 </html>

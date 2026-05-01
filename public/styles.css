@@ -506,3 +506,25 @@ a.post-text:hover {
     padding: 4px 9px;
   }
 }
+
+.notice {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* Add your existing padding, background, border, etc. */
+}
+
+.dismiss-notice-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.7;
+  padding: 0 0 0 10px;
+}
+
+.dismiss-notice-btn:hover {
+  opacity: 1;
+}
