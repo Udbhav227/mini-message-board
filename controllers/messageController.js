@@ -16,11 +16,15 @@ function formatDateTime(date) {
 
 // GET /
 async function getIndex(req, res) {
-  const messages = await db.getAllMessages();
+  // Read ?sort= from query string, default to "hot"
+  const sort = req.query.sort || "hot";
+  const messages = await db.getAllMessages(sort);
+
   const notice = req.query.rateLimited
-    ? `You already ${req.query.rateLimited}d this recently.`
+    ? `You already ${req.query.rateLimited}d this recently. Try again in ${req.query.wait}s.`
     : null;
-  res.render("index", { messages, formatDateTime, notice });
+
+  res.render("index", { messages, formatDateTime, notice, sort });
 }
 
 // GET /new
@@ -56,6 +60,7 @@ const createMessage = [
   },
 ];
 
+// GET /message/:id
 async function getMessageDetails(req, res) {
   const id = parseInt(req.params.id, 10);
   const message = await db.getMessageById(id);
@@ -66,20 +71,23 @@ async function getMessageDetails(req, res) {
   }
 }
 
+// POST /flag/:id
 async function flagMessage(req, res) {
   const id = parseInt(req.params.id, 10);
+  const sort = req.query.sort || "hot";
   try {
     const newFlags = await db.updateFlags(id, 1);
     if (newFlags >= 5) {
-      console.log(`Post ${id} has ${newFlags} flags - consider removing.`);
+      console.log(`Post ${id} has ${newFlags} flags — consider removing.`);
     }
-    res.redirect("/");
+    res.redirect(`/?sort=${sort}`);
   } catch (err) {
     console.error(err);
     res.status(500).send("Error flagging post.");
   }
 }
 
+// POST /like/:id
 async function likeMessage(req, res) {
   const id = parseInt(req.params.id, 10);
   const currentlyLiked = req.body.liked === "true";

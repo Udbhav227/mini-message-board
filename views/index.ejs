@@ -9,26 +9,49 @@
 <body>
 <div class="page">
 
+  <!-- Masthead -->
   <header class="masthead">
     <h1 class="masthead-title">Message<em>Board</em></h1>
     <span class="masthead-count"><%= messages.length %> posts</span>
   </header>
 
+  <!-- Toolbar: sort tabs + new post button -->
   <div class="toolbar">
-    <span class="toolbar-label">Recent</span>
+    <nav class="sort-tabs" aria-label="Sort posts by">
+      <%
+        const sorts = [
+          { key: 'hot',           label: 'Hot',           title: 'Trending — score decays with age' },
+          { key: 'new',           label: 'New',           title: 'Most recently posted' },
+          { key: 'top',           label: 'Top',           title: 'Most liked of all time' },
+          { key: 'rising',        label: 'Rising',        title: 'Recent posts gaining likes fast' },
+          { key: 'controversial', label: 'Controversial', title: 'High likes and high flags' },
+        ];
+      %>
+      <% sorts.forEach(function(s) { %>
+        <a
+          href="/?sort=<%= s.key %>"
+          class="sort-tab <%= sort === s.key ? 'active' : '' %>"
+          title="<%= s.title %>"
+        ><%= s.label %></a>
+      <% }); %>
+    </nav>
+
     <a href="/new" class="btn-new">Post something</a>
   </div>
 
+  <!-- Rate-limit notice -->
   <% if (notice) { %>
     <div class="notice"><%= notice %></div>
   <% } %>
 
+  <!-- Posts -->
   <% if (messages && messages.length > 0) { %>
     <% messages.forEach(function(msg) {
          const isDemoted = msg.flags >= 5;
     %>
     <article class="post <%= isDemoted ? 'demoted' : '' %>">
 
+      <!-- Like / vote column -->
       <div class="vote-col">
         <button
           class="like-btn"
@@ -39,6 +62,7 @@
         <span class="like-count"><%= msg.likes %></span>
       </div>
 
+      <!-- Content -->
       <div>
         <div class="post-author"><%= msg.user %></div>
         <a href="/message/<%= msg.id %>" class="post-text"><%= msg.text %></a>
@@ -46,13 +70,13 @@
         <div class="post-footer">
           <span class="post-time"><%= formatDateTime(msg.added) %></span>
 
-          <form class="flag-form" method="POST" action="/flag/<%= msg.id %>">
+          <form class="flag-form" method="POST" action="/flag/<%= msg.id %>?sort=<%= sort %>">
             <button
               type="submit"
-              class="flag-btn <%= msg.flags > 0 ? 'has-flags' : '' %>"
+              class="flag-btn"
               onclick="return confirm('Flag this post as inappropriate?')"
             >
-              &#9873;
+              ⚑
               <% if (msg.flags > 0) { %>
                 <span class="flag-count-badge <%= msg.flags >= 3 ? 'elevated' : '' %>">
                   <%= msg.flags %>
@@ -95,7 +119,6 @@
         });
 
         if (res.status === 429) {
-          const data = await res.json();
           btn.style.opacity = '0.3';
           setTimeout(() => btn.style.opacity = '', 800);
           return;

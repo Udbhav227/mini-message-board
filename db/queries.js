@@ -1,13 +1,55 @@
 const pool = require("./pool");
 
-async function getAllMessages() {
-  const { rows } = await pool.query(`
-    SELECT *
-    FROM messages
-    ORDER BY
-      CASE WHEN flags >= 10 THEN 1 ELSE 0 END ASC,  -- flagged posts sink
-      added DESC                                      -- newest first within each group
-  `);
+// Flagged posts always sink regardless of sort mode.
+// The CASE guard is prepended to every ORDER BY.
+const FLAG_SINK = `CASE WHEN flags >= 3 THEN 1 ELSE 0 END ASC`;
+
+// Sort SQL fragments — all parameterless, safe to interpolate.
+const SORT_SQL = {
+  // Newest first
+  new: `${FLAG_SINK}, added DESC`,
+
+  // Most liked overall
+  top: `${FLAG_SINK}, likes DESC, added DESC`,
+
+  // Reddit-style hot: score decays with age.
+  // log10(likes+1) / hours_since_posted^0.8
+  // NULLIF prevents division by zero for brand-new posts (< 1hr old).
+  hot: `
+    ${FLAG_SINK},
+    LOG(GREATEST(likes + 1, 1)) /
+      NULLIF(POWER(EXTRACT(EPOCH FROM (NOW() - added)) / 3600.0 + 2, 0.8), 0)
+    DESC,
+    added DESC
+  `,
+
+  // Rising: recent posts (last 24h) ranked by likes gained
+  rising: `
+    ${FLAG_SINK},
+    CASE
+      WHEN added > NOW() - INTERVAL '24 hours'
+        THEN likes
+      ELSE -1
+    END DESC,
+    added DESC
+  `,
+
+  // Controversial: posts that have both likes AND flags (divisive content)
+  // High likes × high flags = high score
+  controversial: `
+    ${FLAG_SINK},
+    (likes + 1) * (flags + 1) DESC,
+    added DESC
+  `,
+};
+
+const VALID_SORTS = new Set(Object.keys(SORT_SQL));
+
+async function getAllMessages(sort = "hot") {
+  const safeSort = VALID_SORTS.has(sort) ? sort : "hot";
+  const { rows } = await pool.query(
+    `SELECT * FROM messages ORDER BY ${SORT_SQL[safeSort]}`,
+  );
   return rows;
 }
 
@@ -53,4 +95,5 @@ module.exports = {
   insertMessage,
   updateLikes,
   updateFlags,
+  VALID_SORTS,
 };
