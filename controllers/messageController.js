@@ -21,7 +21,7 @@ async function getIndex(req, res) {
   const messages = await db.getAllMessages(sort);
 
   const notice = req.query.rateLimited
-    ? `You already ${req.query.rateLimited}d this recently. Try again in ${req.query.wait}s.`
+    ? `You already ${req.query.rateLimited}d this recently.`
     : null;
 
   res.render("index", { messages, formatDateTime, notice, sort });
