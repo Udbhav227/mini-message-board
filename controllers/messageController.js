@@ -16,7 +16,6 @@ function formatDateTime(date) {
 
 // GET /
 async function getIndex(req, res) {
-  // Read ?sort= from query string, default to "hot"
   const sort = req.query.sort || "hot";
   const messages = await db.getAllMessages(sort);
 
@@ -39,15 +38,13 @@ const createMessage = [
     .notEmpty()
     .withMessage("Name cannot be empty.")
     .isLength({ max: 50 })
-    .withMessage("Name must be under 50 characters.")
-    .escape(),
+    .withMessage("Name must be under 50 characters."),
   body("messageText")
     .trim()
     .notEmpty()
     .withMessage("Message cannot be empty.")
     .isLength({ max: 120 })
-    .withMessage("Message must be under 120 characters.")
-    .escape(),
+    .withMessage("Message must be under 180 characters."),
 
   async (req, res) => {
     const errors = validationResult(req);
@@ -78,7 +75,7 @@ async function flagMessage(req, res) {
   try {
     const newFlags = await db.updateFlags(id, 1);
     if (newFlags >= 5) {
-      console.log(`Post ${id} has ${newFlags} flags — consider removing.`);
+      console.log(`Post ${id} has ${newFlags} flags - consider removing.`);
     }
     res.redirect(`/?sort=${sort}`);
   } catch (err) {

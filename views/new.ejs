@@ -64,7 +64,7 @@
   const hint = document.getElementById('char-hint');
 
   ta.addEventListener('input', () => {
-    const left = 120 - ta.value.length;
+    const left = 180 - ta.value.length;
     hint.textContent = `${left} character${left === 1 ? '' : 's'} remaining`;
     hint.className = 'char-hint' + (left <= 20 ? ' warn' : '') + (left <= 0 ? ' over' : '');
   });
